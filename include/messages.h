@@ -25,6 +25,7 @@ namespace vdn {
             int size
         ) {
             if (size != sizeof(packet)) { 
+                vdn::monitor::printStr("Ошибка! Неверный размер пакета");
                 return; 
             }
 
