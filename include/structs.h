@@ -1,6 +1,8 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
+#include <Arduino.h>
+
 using uName = std::array<char, 8>;
 using mText = std::array<char, 128>;
 using MACad = std::array<uint8_t, 6>;
