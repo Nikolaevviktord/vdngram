@@ -19,11 +19,36 @@ namespace vdn {
         std::map<uName, std::vector<message>> direct;
         std::map<uName, std::vector<mText>> channels;
 
-        void recieve(
+        void receive(
             const esp_now_recv_info_t *info,
             const uint8_t *data,
             int size
-        );
+        ) {
+            if (size != sizeof(packet)) { 
+                return; 
+            }
+
+            const auto &decoded = (const packet *) data;
+
+            switch (decoded->TYPE) {
+            case GENERAL_MESSAGE:
+                general.push_back(decoded->MSG);
+                break;
+
+            case DIRECT_MESSAGE:
+                direct[decoded->MSG.username].push_back(decoded->MSG);
+                break;
+
+            case CHANNEL_MESSAGE:
+                channels[decoded->MSG.username].push_back(decoded->MSG.text);
+                break;
+            
+            default:
+                break;
+            }
+
+            vdn::monitor::interpretePacket(decoded);
+        }
 
         void init() {
             WiFi.mode(WIFI_STA);
@@ -109,37 +134,6 @@ namespace vdn {
             channels[msg.username].push_back(msg.text);
 
             vdn::monitor::printStr("Отправлен пост в канал");
-        }
-
-        void recieve(
-            const esp_now_recv_info_t *info,
-            const uint8_t *data,
-            int size
-        ) {
-            if (size != sizeof(packet)) { 
-                return; 
-            }
-
-            const auto &decoded = (const packet *) data;
-
-            switch (decoded->TYPE) {
-            case GENERAL_MESSAGE:
-                general.push_back(decoded->MSG);
-                break;
-
-            case DIRECT_MESSAGE:
-                direct[decoded->MSG.username].push_back(decoded->MSG);
-                break;
-
-            case CHANNEL_MESSAGE:
-                channels[decoded->MSG.username].push_back(decoded->MSG.text);
-                break;
-            
-            default:
-                break;
-            }
-
-            vdn::monitor::interpretePacket(decoded);
         }
     }
 }
