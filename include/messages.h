@@ -7,35 +7,17 @@
 #include <map>
 #include <vector>
 
-using uName = std::array<char, 8>;
-using mText = std::array<char, 128>;
-using MACad = std::array<uint8_t, 6>;
+#include <structs.h>
+#include <monitor.h>
 
 namespace vdn {
     namespace messages {
-        const int8_t GENERAL_MESSAGE = 0;
-        const int8_t DIRECT_MESSAGE = 1;
-        const int8_t CHANNEL_MESSAGE = 2;
-
-        const bool me = 0;
-        const bool other = 1;
-
         std::map<MACad, uName> users;
         uName localUsername = {"user"};
-
-        struct message {
-            uName username;
-            mText text;
-        };
 
         std::vector<message> general;
         std::map<uName, std::vector<message>> direct;
         std::map<uName, std::vector<mText>> channels;
-
-        struct packet {
-            int8_t TYPE;
-            message MSG;
-        };
 
         void sendGeneral(message & msg) {
             packet data = {
@@ -59,6 +41,8 @@ namespace vdn {
             }
 
             general.push_back(msg);
+
+            
         }
 
         void sendDirect(MACad & recipient, message & msg) {
@@ -120,7 +104,7 @@ namespace vdn {
                 return; 
             }
 
-            const auto &decoded = (const packet * ) data;
+            const auto &decoded = (const packet *) data;
 
             switch (decoded->TYPE) {
             case GENERAL_MESSAGE:
@@ -138,6 +122,8 @@ namespace vdn {
             default:
                 break;
             }
+
+            vdn::monitor::interpretePacket(decoded);
         }
     }
 }
