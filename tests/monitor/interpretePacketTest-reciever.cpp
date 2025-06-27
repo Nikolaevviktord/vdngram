@@ -1,7 +1,7 @@
 #include <messages.h>
 
 void setup() {
-    init();
+    vdn::messages::init();
 }
 
 // Получено сообщение для общего чата
