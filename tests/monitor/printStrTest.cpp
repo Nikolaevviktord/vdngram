@@ -6,3 +6,7 @@ void setup() {
 }
 
 void loop() {}
+
+// Serial-порт инициализирован с частотой 115200 baud
+// String1
+// String2
