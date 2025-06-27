@@ -19,6 +19,18 @@ namespace vdn {
         std::map<uName, std::vector<message>> direct;
         std::map<uName, std::vector<mText>> channels;
 
+        void recieve(
+            const esp_now_recv_info_t *info,
+            const uint8_t *data,
+            int size
+        );
+
+        void init() {
+            WiFi.mode(WIFI_STA);
+            esp_now_init();
+            esp_now_register_recv_cb(receive);
+        }
+
         void sendGeneral(message & msg) {
             packet data = {
                 .TYPE = GENERAL_MESSAGE,
@@ -42,7 +54,7 @@ namespace vdn {
 
             general.push_back(msg);
 
-            
+            vdn::monitor::printStr("Отправлено сообщение для общего чата");
         }
 
         void sendDirect(MACad & recipient, message & msg) {
@@ -69,6 +81,8 @@ namespace vdn {
             }
 
             direct[msg.username].push_back(msg);
+
+            vdn::monitor::printStr("Отправлено личное сообщение");
         }
 
         void sendChanel(message & msg) {
@@ -93,6 +107,8 @@ namespace vdn {
             }
 
             channels[msg.username].push_back(msg.text);
+
+            vdn::monitor::printStr("Отправлен пост в канал");
         }
 
         void recieve(
