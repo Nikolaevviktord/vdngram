@@ -39,9 +39,9 @@ namespace vdn {
                 break;
             }
 
-            Serial.printf("%s\n", data->MSG.username);
+            Serial.printf("%s\n", data->MSG.username.data());
 
-            Serial.printf("Текст сообщения: %s\n", data->MSG.text);
+            Serial.printf("Текст сообщения: %s\n", data->MSG.text.data());
         }
 
         void printStr(const char * str) {
