@@ -20,7 +20,7 @@ namespace vdn {
         std::map<uName, std::vector<mText>> channels;
 
         void receive(
-            const esp_now_recv_info_t *info,
+            const uint8_t *,
             const uint8_t *data,
             int size
         ) {
@@ -51,22 +51,39 @@ namespace vdn {
             vdn::monitor::interpretePacket(decoded);
         }
 
+        bool isInited = false;
+
         void init() {
+            if (isInited) return;
+
             WiFi.mode(WIFI_STA);
             esp_now_init();
-            esp_now_register_recv_cb(receive);
+
+            isInited = true;
+        }
+
+        void attachReciever() { 
+            init();
+
+            esp_now_register_recv_cb(receive); 
         }
 
         void sendGeneral(message & msg) {
+            init();
+
             packet data = {
                 .TYPE = GENERAL_MESSAGE,
                 .MSG = msg
             };
 
+
             esp_now_peer_info_t peer = {};
             MACad broadcast_address = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-            std::copy(broadcast_address.begin(), broadcast_address.end(), peer.peer_addr);
-            esp_now_add_peer(&peer);
+            memcpy(peer.peer_addr, broadcast_address.data(), 6); 
+            
+            if (!esp_now_is_peer_exist(peer.peer_addr)) {
+                esp_now_add_peer(&peer);
+            }
 
             esp_err_t result = esp_now_send(
                 peer.peer_addr,
@@ -84,6 +101,8 @@ namespace vdn {
         }
 
         void sendDirect(MACad & recipient, message & msg) {
+            init();
+
             packet data = {
                 .TYPE = DIRECT_MESSAGE,
                 .MSG = msg
@@ -94,7 +113,10 @@ namespace vdn {
 
             esp_now_peer_info_t peer = { 0 };
             memcpy(peer.peer_addr, target_mac, sizeof(peer.peer_addr));
-            esp_now_add_peer(&peer);
+            
+            if (!esp_now_is_peer_exist(peer.peer_addr)) {
+                esp_now_add_peer(&peer);
+            }
 
             esp_err_t result = esp_now_send(
                 target_mac,
@@ -112,6 +134,8 @@ namespace vdn {
         }
 
         void sendChanel(message & msg) {
+            init();
+
             packet data = {
                 .TYPE = CHANNEL_MESSAGE,
                 .MSG = msg
@@ -120,7 +144,10 @@ namespace vdn {
             esp_now_peer_info_t peer = {};
             MACad broadcast_address = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
             std::copy(broadcast_address.begin(), broadcast_address.end(), peer.peer_addr);
-            esp_now_add_peer(&peer);
+            
+            if (!esp_now_is_peer_exist(peer.peer_addr)) {
+                esp_now_add_peer(&peer);
+            }
 
             esp_err_t result = esp_now_send(
                 peer.peer_addr,
