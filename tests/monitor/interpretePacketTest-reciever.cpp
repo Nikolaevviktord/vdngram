@@ -1,7 +1,7 @@
 #include <messages.h>
 
 void setup() {
-    vdn::messages::init();
+    vdn::messages::attachReciever();
 }
 
 void loop() {}
