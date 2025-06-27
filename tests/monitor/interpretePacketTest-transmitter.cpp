@@ -1,5 +1,3 @@
-// TOFIX: infinity GME
-
 #include <messages.h>
 
 void setup() {
