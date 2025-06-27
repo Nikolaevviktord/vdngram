@@ -1,7 +1,7 @@
 #include <messages.h>
 
 void setup() {
-    vdn::message msg = {
+    vdn::messages::message msg = {
         .username = {"vdn"},
         .text = {"Hello, General!"}
     };
