@@ -3,18 +3,26 @@
 
 #include <Arduino.h>
 
-#include <messages.h>
+#include <structs.h>
 
 namespace vdn {
     namespace monitor {
+        bool isInited = 0;
+      
         void init(int64_t baudrate=115200) {
+            if (isInited) return;
+            
             Serial.begin(baudrate);
             
-            Serial.printf("Serial-порт инициализирован с частотой %lld baud", baudrate);
+            Serial.printf("Serial-порт инициализирован с частотой %lld baud\n", baudrate);
+
+            isInited = true;
         }
 
-        void interpretePacket(const messages::packet & data) {
-            switch (data.TYPE) {
+        void interpretePacket(const vdn::messages::packet * data) {
+            init();
+       
+            switch (data->TYPE) {
             case messages::GENERAL_MESSAGE:
                 Serial.printf("Получено сообщение для общего чата\nОтправитель: ");
                 break;
@@ -31,9 +39,15 @@ namespace vdn {
                 break;
             }
 
-            Serial.printf("%s\n", data.MSG.username);
+            Serial.printf("%s\n", data->MSG.username);
 
-            Serial.printf("Текст сообщения: %s\n", data.MSG.text);
+            Serial.printf("Текст сообщения: %s\n", data->MSG.text);
+        }
+
+        void printStr(const char * str) {
+            init();
+            
+            Serial.println(str);
         }
     }
 }
